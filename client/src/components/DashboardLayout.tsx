@@ -53,13 +53,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Email Verification Banner */}
-      {user && !user.isEmailVerified && (
-        <EmailVerificationBanner userEmail={user.email} />
-      )}
-      
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col z-30">
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -111,7 +106,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <main className="ml-64 min-h-screen">
-        {children}
+        {/* Email Verification Banner */}
+        {user && !user.isEmailVerified && (
+          <div className="fixed top-0 left-64 right-0 z-40">
+            <EmailVerificationBanner userEmail={user.email} />
+          </div>
+        )}
+        
+        {/* Content with padding if banner is visible */}
+        <div className={user && !user.isEmailVerified ? 'pt-20' : ''}>
+          {children}
+        </div>
       </main>
     </div>
   );
