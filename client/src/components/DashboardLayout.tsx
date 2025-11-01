@@ -62,10 +62,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
-            </div>
+          <div className="flex items-center space-x-3">
+            <img src="/workorg_logo.png" alt="WORKORG" className="w-10 h-10" />
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               WORKORG
             </span>

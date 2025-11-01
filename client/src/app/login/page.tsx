@@ -38,10 +38,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-white" />
-            </div>
+          <div className="inline-flex items-center space-x-3 mb-4">
+            <img src="/workorg_logo.png" alt="WORKORG" className="w-12 h-12" />
             <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               WORKORG
             </span>
