@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// Use relative URL in production (works with Nginx proxy) or localhost in development
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -11,9 +12,17 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Get token from zustand persisted storage
+  const authStorage = localStorage.getItem('auth-storage');
+  if (authStorage) {
+    try {
+      const { state } = JSON.parse(authStorage);
+      if (state?.token) {
+        config.headers.Authorization = `Bearer ${state.token}`;
+      }
+    } catch (error) {
+      console.error('Failed to parse auth storage:', error);
+    }
   }
   return config;
 });
@@ -23,8 +32,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Clear zustand persisted auth storage
+      localStorage.removeItem('auth-storage');
       window.location.href = '/login';
     }
     return Promise.reject(error);
