@@ -149,11 +149,11 @@ router.post('/:id/members', authenticateToken, async (req: AuthRequest, res: Res
     
     if (user) {
       // User exists - add directly to project
-      if (project.members.some((member) => member.toString() === user._id.toString())) {
+      if (project.members.some((member) => member.toString() === (user._id as any).toString())) {
         return res.status(400).json({ message: 'User already a member' });
       }
 
-      project.members.push(user._id);
+      project.members.push(user._id as any);
       await project.save();
       await project.populate('members', 'name email');
 

@@ -64,8 +64,8 @@ router.post(
             const project = await Project.findById(invitation.project);
             if (project) {
               // Add user to project
-              if (!project.members.includes(user._id)) {
-                project.members.push(user._id);
+              if (!project.members.includes(user._id as any)) {
+                project.members.push(user._id as any);
                 await project.save();
               }
 
