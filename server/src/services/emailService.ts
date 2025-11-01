@@ -4,6 +4,14 @@ import dotenv from 'dotenv';
 // Ensure environment variables are loaded
 dotenv.config();
 
+// Logo URL for email templates
+const getLogoUrl = () => {
+  const baseUrl = process.env.BACKEND_URL || process.env.FRONTEND_URL || 'http://localhost:5000';
+  // Remove /api if present and add /public/workorg_logo.png
+  const cleanUrl = baseUrl.replace('/api', '');
+  return `${cleanUrl}/public/workorg_logo.png`;
+};
+
 // Debug: Log configuration (remove in production)
 console.log('📧 Email Config:', {
   host: process.env.SMTP_HOST || 'smtp.hostinger.com',
@@ -66,6 +74,7 @@ export const sendProjectInvitation = async (
 ): Promise<void> => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const invitationLink = `${frontendUrl}/invite/${invitationToken}`;
+  const logoUrl = getLogoUrl();
 
   const html = `
     <!DOCTYPE html>
@@ -96,21 +105,14 @@ export const sendProjectInvitation = async (
           text-align: center;
           position: relative;
         }
-        .logo {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255, 255, 255, 0.2);
-          padding: 12px 24px;
-          border-radius: 12px;
+        .logo-container {
+          display: inline-block;
           margin-bottom: 20px;
-          backdrop-filter: blur(10px);
         }
-        .logo-text {
-          color: #ffffff;
-          font-size: 24px;
-          font-weight: 800;
-          letter-spacing: 1px;
+        .logo-img {
+          width: 80px;
+          height: 80px;
+          display: block;
         }
         .header h1 {
           color: #ffffff;
@@ -227,8 +229,8 @@ export const sendProjectInvitation = async (
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">
-            <span class="logo-text">✓ WORKORG</span>
+          <div class="logo-container">
+            <img src="${logoUrl}" alt="WORKORG" class="logo-img" />
           </div>
           <h1>🎉 Project Invitation</h1>
         </div>
@@ -321,6 +323,7 @@ export const sendWelcomeEmail = async (
   projectName?: string
 ): Promise<void> => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const logoUrl = getLogoUrl();
 
   const html = `
     <!DOCTYPE html>
@@ -351,21 +354,14 @@ export const sendWelcomeEmail = async (
           text-align: center;
           position: relative;
         }
-        .logo {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255, 255, 255, 0.2);
-          padding: 12px 24px;
-          border-radius: 12px;
+        .logo-container {
+          display: inline-block;
           margin-bottom: 20px;
-          backdrop-filter: blur(10px);
         }
-        .logo-text {
-          color: #ffffff;
-          font-size: 24px;
-          font-weight: 800;
-          letter-spacing: 1px;
+        .logo-img {
+          width: 80px;
+          height: 80px;
+          display: block;
         }
         .header h1 {
           color: #ffffff;
@@ -497,8 +493,8 @@ export const sendWelcomeEmail = async (
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">
-            <span class="logo-text">✓ WORKORG</span>
+          <div class="logo-container">
+            <img src="${logoUrl}" alt="WORKORG" class="logo-img" />
           </div>
           <h1>🚀 Welcome Aboard!</h1>
         </div>
@@ -625,6 +621,7 @@ export const sendVerificationEmail = async (
 ): Promise<void> => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+  const logoUrl = getLogoUrl();
 
   const html = `
     <!DOCTYPE html>
@@ -655,21 +652,14 @@ export const sendVerificationEmail = async (
           text-align: center;
           position: relative;
         }
-        .logo {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255, 255, 255, 0.2);
-          padding: 12px 24px;
-          border-radius: 12px;
+        .logo-container {
+          display: inline-block;
           margin-bottom: 20px;
-          backdrop-filter: blur(10px);
         }
-        .logo-text {
-          color: #ffffff;
-          font-size: 24px;
-          font-weight: 800;
-          letter-spacing: 1px;
+        .logo-img {
+          width: 80px;
+          height: 80px;
+          display: block;
         }
         .header h1 {
           color: #ffffff;
@@ -798,8 +788,8 @@ export const sendVerificationEmail = async (
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">
-            <span class="logo-text">✓ WORKORG</span>
+          <div class="logo-container">
+            <img src="${logoUrl}" alt="WORKORG" class="logo-img" />
           </div>
           <h1>✉️ Email Verification</h1>
         </div>
