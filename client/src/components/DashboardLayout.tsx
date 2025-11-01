@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, LayoutDashboard, FolderKanban, LogOut, User, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import EmailVerificationBanner from './EmailVerificationBanner';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -52,6 +53,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Email Verification Banner */}
+      {user && !user.isEmailVerified && (
+        <EmailVerificationBanner userEmail={user.email} />
+      )}
+      
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Logo */}

@@ -344,9 +344,147 @@ export const sendWelcomeEmail = async (
   });
 };
 
+export const sendVerificationEmail = async (
+  email: string,
+  name: string,
+  verificationToken: string
+): Promise<void> => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #1f2937;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 0;
+          background-color: #f3f4f6;
+        }
+        .container {
+          background-color: #ffffff;
+          margin: 20px;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%);
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .header h1 {
+          color: #ffffff;
+          margin: 0;
+          font-size: 28px;
+          font-weight: bold;
+        }
+        .content {
+          background: #ffffff;
+          padding: 40px 30px;
+          color: #1f2937;
+        }
+        .content p {
+          color: #374151;
+          margin: 16px 0;
+        }
+        .button {
+          display: inline-block;
+          padding: 14px 32px;
+          background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%);
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 8px;
+          margin: 24px 0;
+          font-weight: bold;
+          font-size: 16px;
+          box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+        }
+        .link-box {
+          background: #f9fafb;
+          padding: 16px;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
+          word-break: break-all;
+          color: #4b5563;
+          font-size: 14px;
+        }
+        .footer {
+          text-align: center;
+          padding: 30px;
+          background-color: #f9fafb;
+          color: #6b7280;
+          font-size: 14px;
+          border-top: 1px solid #e5e7eb;
+        }
+        .note {
+          background-color: #fef3c7;
+          border-left: 4px solid #f59e0b;
+          padding: 12px 16px;
+          margin: 20px 0;
+          border-radius: 4px;
+          color: #92400e;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>✉️ Verify Your Email Address</h1>
+        </div>
+        <div class="content">
+          <p style="font-size: 16px; color: #1f2937;">Hi <strong>${name}</strong>!</p>
+          <p style="color: #374151;">Thank you for registering with WORKORG! To complete your registration and activate your account, please verify your email address.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationLink}" class="button">Verify Email Address</a>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
+          <div class="link-box">
+            ${verificationLink}
+          </div>
+          <div class="note">
+            <strong style="color: #92400e;">Important:</strong> This verification link will expire in 24 hours. If you didn't create an account with WORKORG, you can safely ignore this email.
+          </div>
+        </div>
+        <div class="footer">
+          <p style="margin: 8px 0; color: #6b7280;">© ${new Date().getFullYear()} WORKORG - Agile Project Management</p>
+          <p style="margin: 8px 0; color: #9ca3af; font-size: 12px;">This is an automated message, please do not reply to this email.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+    Verify Your Email Address
+    
+    Hi ${name}!
+    
+    Thank you for registering with WORKORG! To complete your registration, please verify your email address by visiting:
+    ${verificationLink}
+    
+    This verification link will expire in 24 hours.
+    
+    If you didn't create an account with WORKORG, you can safely ignore this email.
+  `;
+
+  await sendEmail({
+    to: email,
+    subject: 'Verify Your Email - WORKORG',
+    html,
+    text,
+  });
+};
+
 export default {
   sendEmail,
   sendProjectInvitation,
   sendWelcomeEmail,
+  sendVerificationEmail,
 };
 
