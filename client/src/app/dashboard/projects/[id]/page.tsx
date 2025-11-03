@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
+import SharedVideoPlayer from '@/components/SharedVideoPlayer';
+import AddVideoModal from '@/components/AddVideoModal';
 import {
   ArrowLeft as ArrowLeftIcon,
   Plus,
@@ -13,6 +15,7 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
+  Youtube,
 } from 'lucide-react';
 import { projectsAPI, tasksAPI } from '@/lib/api';
 
@@ -48,12 +51,43 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showAddVideoModal, setShowAddVideoModal] = useState(false);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [newTaskStatus, setNewTaskStatus] = useState<Task['status']>('todo');
+  const [hasVideo, setHasVideo] = useState(false);
 
   useEffect(() => {
     loadProject();
     loadTasks();
+    checkForVideo();
   }, [projectId]);
+
+  const checkForVideo = async () => {
+    try {
+      const authStorage = localStorage.getItem('auth-storage');
+      if (!authStorage) return;
+
+      const { state } = JSON.parse(authStorage);
+      const token = state?.token;
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const response = await fetch(`${API_URL}/videos/project/${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setHasVideo(true);
+          setShowVideoPlayer(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check for video:', error);
+    }
+  };
 
   const loadProject = async () => {
     try {
@@ -161,6 +195,14 @@ export default function ProjectDetailPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setShowAddVideoModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                title="Share YouTube video with team"
+              >
+                <Youtube className="w-4 h-4" />
+                <span>{hasVideo ? 'Change Video' : 'Share Video'}</span>
+              </button>
               <button
                 onClick={() => setShowAddMemberModal(true)}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
@@ -304,6 +346,31 @@ export default function ProjectDetailPage() {
           onSuccess={() => {
             setShowAddMemberModal(false);
             loadProject();
+          }}
+        />
+      )}
+
+      {/* Add Video Modal */}
+      {showAddVideoModal && (
+        <AddVideoModal
+          projectId={projectId}
+          onClose={() => setShowAddVideoModal(false)}
+          onVideoAdded={() => {
+            setShowAddVideoModal(false);
+            setHasVideo(true);
+            setShowVideoPlayer(true);
+            checkForVideo();
+          }}
+        />
+      )}
+
+      {/* Shared Video Player */}
+      {showVideoPlayer && (
+        <SharedVideoPlayer
+          projectId={projectId}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setHasVideo(false);
           }}
         />
       )}
