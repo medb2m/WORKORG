@@ -18,9 +18,16 @@ const app = express();
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://workorg.benmohamed.com',
+      'http://localhost:3000',
+    ],
     methods: ['GET', 'POST'],
+    credentials: true,
   },
+  transports: ['websocket', 'polling'],
+  path: '/socket.io/',
 });
 
 const PORT = process.env.PORT || 5000;
@@ -74,26 +81,32 @@ io.on('connection', (socket) => {
 
   // Video control events
   socket.on('video-play', (data: { projectId: string; currentTime: number }) => {
+    console.log(`▶️ Broadcasting video-play to project-${data.projectId} at time ${data.currentTime}`);
     socket.to(`project-${data.projectId}`).emit('video-play', { currentTime: data.currentTime });
   });
 
   socket.on('video-pause', (data: { projectId: string; currentTime: number }) => {
+    console.log(`⏸️ Broadcasting video-pause to project-${data.projectId} at time ${data.currentTime}`);
     socket.to(`project-${data.projectId}`).emit('video-pause', { currentTime: data.currentTime });
   });
 
   socket.on('video-seek', (data: { projectId: string; currentTime: number }) => {
+    console.log(`⏩ Broadcasting video-seek to project-${data.projectId} at time ${data.currentTime}`);
     socket.to(`project-${data.projectId}`).emit('video-seek', { currentTime: data.currentTime });
   });
 
   socket.on('video-added', (data: { projectId: string }) => {
+    console.log(`📺 Broadcasting video-added to project-${data.projectId}`);
     socket.to(`project-${data.projectId}`).emit('video-added');
   });
 
   socket.on('video-removed', (data: { projectId: string }) => {
+    console.log(`🗑️ Broadcasting video-removed to project-${data.projectId}`);
     socket.to(`project-${data.projectId}`).emit('video-removed');
   });
 
   socket.on('video-minimized', (data: { projectId: string; isMinimized: boolean }) => {
+    console.log(`📐 Broadcasting video-minimized to project-${data.projectId}, state: ${data.isMinimized}`);
     socket.to(`project-${data.projectId}`).emit('video-minimized', { isMinimized: data.isMinimized });
   });
 

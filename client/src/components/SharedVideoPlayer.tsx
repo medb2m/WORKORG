@@ -15,7 +15,10 @@ import {
 import { io, Socket } from 'socket.io-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api');
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? 'https://workorg.benmohamed.com' : 'http://localhost:5000');
+// Connect to same origin in production (works through Nginx)
+const SOCKET_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+  ? window.location.origin 
+  : 'http://localhost:5000';
 
 interface SharedVideoPlayerProps {
   projectId: string;
@@ -52,40 +55,57 @@ export default function SharedVideoPlayer({ projectId, onClose }: SharedVideoPla
 
   // Socket.io connection
   useEffect(() => {
+    console.log('🔌 Connecting to Socket.io at:', SOCKET_URL);
+    
     const socket = io(SOCKET_URL, {
+      path: '/socket.io/',
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('🔌 Connected to Socket.io');
+      console.log('✅ Connected to Socket.io, ID:', socket.id);
       socket.emit('join-project', projectId);
+      console.log('📺 Joining project room:', projectId);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('❌ Socket connection error:', error);
     });
 
     // Listen for video control events
     socket.on('video-play', ({ currentTime }: { currentTime: number }) => {
+      console.log('📡 Received video-play event, time:', currentTime);
       if (playerRef.current && !isSyncingRef.current) {
         isSyncingRef.current = true;
         playerRef.current.seekTo(currentTime, true);
         playerRef.current.playVideo();
+        console.log('▶️ Playing video at:', currentTime);
         setTimeout(() => { isSyncingRef.current = false; }, 500);
       }
     });
 
     socket.on('video-pause', ({ currentTime }: { currentTime: number }) => {
+      console.log('📡 Received video-pause event, time:', currentTime);
       if (playerRef.current && !isSyncingRef.current) {
         isSyncingRef.current = true;
         playerRef.current.seekTo(currentTime, true);
         playerRef.current.pauseVideo();
+        console.log('⏸️ Pausing video at:', currentTime);
         setTimeout(() => { isSyncingRef.current = false; }, 500);
       }
     });
 
     socket.on('video-seek', ({ currentTime }: { currentTime: number }) => {
+      console.log('📡 Received video-seek event, time:', currentTime);
       if (playerRef.current && !isSyncingRef.current) {
         isSyncingRef.current = true;
         playerRef.current.seekTo(currentTime, true);
+        console.log('⏩ Seeking to:', currentTime);
         setTimeout(() => { isSyncingRef.current = false; }, 500);
       }
     });
@@ -146,6 +166,7 @@ export default function SharedVideoPlayer({ projectId, onClose }: SharedVideoPla
   const handlePlay = () => {
     if (!isSyncingRef.current && playerRef.current) {
       const currentTime = playerRef.current.getCurrentTime();
+      console.log('🎬 Broadcasting video-play event, time:', currentTime);
       socketRef.current?.emit('video-play', { projectId, currentTime });
     }
   };
@@ -153,6 +174,7 @@ export default function SharedVideoPlayer({ projectId, onClose }: SharedVideoPla
   const handlePause = () => {
     if (!isSyncingRef.current && playerRef.current) {
       const currentTime = playerRef.current.getCurrentTime();
+      console.log('🎬 Broadcasting video-pause event, time:', currentTime);
       socketRef.current?.emit('video-pause', { projectId, currentTime });
     }
   };
@@ -160,6 +182,7 @@ export default function SharedVideoPlayer({ projectId, onClose }: SharedVideoPla
   const handleSeek = () => {
     if (!isSyncingRef.current && playerRef.current) {
       const currentTime = playerRef.current.getCurrentTime();
+      console.log('🎬 Broadcasting video-seek event, time:', currentTime);
       socketRef.current?.emit('video-seek', { projectId, currentTime });
     }
   };

@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Youtube, Loader2, Plus } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api');
+const SOCKET_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+  ? window.location.origin 
+  : 'http://localhost:5000';
 
 interface AddVideoModalProps {
   projectId: string;
@@ -16,6 +20,19 @@ export default function AddVideoModal({ projectId, onClose, onVideoAdded }: AddV
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    const socketInstance = io(SOCKET_URL, {
+      path: '/socket.io/',
+      transports: ['websocket', 'polling'],
+    });
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +62,10 @@ export default function AddVideoModal({ projectId, onClose, onVideoAdded }: AddV
         const data = await response.json();
         throw new Error(data.message || 'Failed to add video');
       }
+
+      // Notify other clients via Socket.io
+      socket?.emit('video-added', { projectId });
+      console.log('📺 Video added, notifying team');
 
       onVideoAdded();
       onClose();
